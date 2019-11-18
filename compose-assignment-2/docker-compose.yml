@@ -1,7 +1,7 @@
 version: '2'
 
 services:
-  drupal:
+  container_name: drupal
     image: drupal
       ports:
         - "8080:80"
