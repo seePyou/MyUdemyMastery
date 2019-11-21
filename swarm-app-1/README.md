@@ -6,15 +6,25 @@ Here is a basic diagram of how the 5 services will work:
 ![diagram](./architecture.png)
 - All images are on Docker Hub, so you should use editor to craft your commands locally, then paste them into swarm shell (at least that's how I'd do it)
 - a `backend` and `frontend` overlay network are needed. Nothing different about them other then that backend will help protect database from the voting web app. (similar to how a VLAN setup might be in traditional architecture)
+
+docker network create -d overlay backend
+docker network create -d overlay frontend
+
 - The database server should use a named volume for preserving data. Use the new `--mount` format to do this: `--mount type=volume,source=db-data,target=/var/lib/postgresql/data`
 
 ### Services (names below should be service names)
+
+docker service create --name vote --replicas 3 --network frontend -p 80:80 bretfisher/examplevotingapp_vote
+
 - vote
     - bretfisher/examplevotingapp_vote
     - web front end for users to vote dog/cat
     - ideally published on TCP 80. Container listens on 80
     - on frontend network
     - 2+ replicas of this container
+
+
+docker service create --name redis --replicas 1 --network frontend redis:3.2
 
 - redis
     - redis:3.2
@@ -23,6 +33,9 @@ Here is a basic diagram of how the 5 services will work:
     - on frontend network
     - 1 replica NOTE VIDEO SAYS TWO BUT ONLY ONE NEEDED
 
+
+docker service create --name worker --replicas 1 --network frontend --network backend bretfisher/examplevotingapp_worker:java
+
 - worker
     - bretfisher/examplevotingapp_worker:java
     - backend processor of redis and storing results in postgres
@@ -30,11 +43,17 @@ Here is a basic diagram of how the 5 services will work:
     - on frontend and backend networks
     - 1 replica
 
+
+docker service create --name db --replicas 1 --network backend --mount type=volume,source=db-data,target=/var/lib/postgresql/data postgres:9.4
+
 - db
     - postgres:9.4
     - one named volume needed, pointing to /var/lib/postgresql/data
     - on backend network
     - 1 replica
+
+
+docker service create --name result --replicas 1 --network backend -p 1337:80  bretfisher/examplevotingapp_result
 
 - result
     - bretfisher/examplevotingapp_result
