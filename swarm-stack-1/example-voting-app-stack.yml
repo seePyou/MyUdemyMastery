@@ -32,7 +32,7 @@ services:
     depends_on:
       - redis
     deploy:
-      replicas: 2
+      replicas: 4
       update_config:
         parallelism: 2
       restart_policy:
@@ -63,7 +63,7 @@ services:
       - redis
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 3
       labels: [APP=VOTING]
       restart_policy:
         condition: on-failure
@@ -81,8 +81,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
     deploy:
-      placement:
-        constraints: [node.role == manager]
+      replicas: 3
 
 networks:
   frontend:
@@ -90,3 +89,4 @@ networks:
 
 volumes:
   db-data:
+
