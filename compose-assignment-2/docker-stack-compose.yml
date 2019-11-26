@@ -20,7 +20,7 @@ services:
     environment:
       - POSTGRES_PASSWORD_FILE=/run/secrets/psql-pw
     secrets:
-      psql-pw
+      - psql-pw
     volumes:
       - drupal-data:/var/lib/postgresql/data
 
